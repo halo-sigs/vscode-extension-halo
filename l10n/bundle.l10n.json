@@ -1,0 +1,23 @@
+{
+  "No site found": "No site found",
+  "Open in browser": "Open in browser",
+  "Publish success!": "Publish success!",
+  "Please open a Markdown file.": "Please open a Markdown file.",
+  "Upload images success!": "Upload images success!",
+  "Post not found": "Post not found",
+  "File already exists": "File already exists",
+  "Uploading images...": "Uploading images...",
+  "Site url": "Site url",
+  "Please input your site url": "Please input your site url",
+  "Username": "Username",
+  "Please input your username": "Please input your username",
+  "Password": "Password",
+  "Please input your password": "Please input your password",
+  "Please select a attachment policy": "Please select a attachment policy",
+  "Ungrouped": "Ungrouped",
+  "Please select a attachment group": "Please select a attachment group",
+  "Setup Success": "Setup Success",
+  "Setup Failed, Please check your site url, username and password": "Setup Failed, Please check your site url, username and password",
+  "Please select a post": "Please select a post",
+  "Publishing...": "Publishing..."
+}
