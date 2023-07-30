@@ -1,9 +1,5 @@
 # Change Log
 
-All notable changes to the "vscode-extension-halo" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
+## 1.0.0-beta.1
 
 - Initial release
