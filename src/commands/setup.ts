@@ -80,6 +80,9 @@ export default async () => {
         new Promise((resolve) => {
           axios
             .get<GroupList>(`${url}/apis/storage.halo.run/v1alpha1/groups`, {
+              params: {
+                labelSelector: "!halo.run/hidden",
+              },
               auth: { username, password },
             })
             .then(({ data: groups }) => {
