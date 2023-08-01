@@ -231,7 +231,12 @@ class HaloService {
 
   public async getPosts(): Promise<ListedPost[]> {
     const { data: posts } = await this.apiClient.get<ListedPostList>(
-      "/apis/api.console.halo.run/v1alpha1/posts"
+      "/apis/api.console.halo.run/v1alpha1/posts",
+      {
+        params: {
+          labelSelector: "content.halo.run/deleted=false",
+        },
+      }
     );
     return Promise.resolve(posts.items);
   }
