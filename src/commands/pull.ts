@@ -24,18 +24,20 @@ async function fetchPosts(): Promise<HaloPostQuickPickItem[]> {
 export default async () => {
   const service = new HaloService(siteStore.getDefaultSite());
 
-  const item = await vscode.window.showQuickPick<HaloPostQuickPickItem>(
+  const items = await vscode.window.showQuickPick<HaloPostQuickPickItem>(
     fetchPosts(),
     {
       placeHolder: vscode.l10n.t("Please select a post"),
       matchOnDescription: true,
+      canPickMany: true,
     }
   );
 
-  if (!item) {
+  if (!items?.length) {
     return;
   }
 
-  const postName = item.name;
-  service.pullPost(postName);
+  items.forEach((item) => {
+    service.pullPost(item.name);
+  });
 };
