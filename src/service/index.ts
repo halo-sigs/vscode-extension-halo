@@ -58,6 +58,8 @@ class HaloService {
       return;
     }
 
+    await activeEditor.document.save();
+
     let params: PostRequest = {
       post: {
         spec: {
@@ -190,10 +192,14 @@ class HaloService {
         return;
       }
 
+      await activeEditor.document.save();
+
       const markdownText = document.getText();
       const imageRegex = /!\[.*?\]\((.*?)\)/g;
+
       let match;
 
+      const imagePaths: { path: string; absolutePath: string }[] = [];
       const matchedImages: { old: string; new: string }[] = [];
 
       while ((match = imageRegex.exec(markdownText)) !== null) {
@@ -208,33 +214,61 @@ class HaloService {
           imagePath
         );
 
-        const permalink = await this.uploadImage(absoluteImagePath);
-
-        matchedImages.push({
-          old: imagePath,
-          new: permalink,
+        imagePaths.push({
+          path: imagePath,
+          absolutePath: absoluteImagePath,
         });
       }
 
-      let newMarkdownText = markdownText;
-      matchedImages.forEach((item) => {
-        newMarkdownText = newMarkdownText.replace(item.old, item.new);
-      });
+      if (imagePaths.length === 0) {
+        return;
+      }
 
-      await activeEditor.edit((editBuilder) => {
-        editBuilder.replace(
-          new vscode.Range(
-            document.positionAt(0),
-            document.positionAt(markdownText.length)
-          ),
-          newMarkdownText
-        );
-      });
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: vscode.l10n.t("Uploading images..."),
+          cancellable: false,
+        },
+        async (process) => {
+          for (let i = 0; i < imagePaths.length; i++) {
+            const imagePath = imagePaths[i];
+            process.report({
+              message: `${i + 1}/${imagePaths.length} ${imagePath.path}`,
+              increment: (100 / imagePaths.length) * (i + 1),
+            });
 
-      await activeEditor.document.save();
+            const permalink = await this.uploadImage(imagePath.absolutePath);
 
-      vscode.window.showInformationMessage(
-        vscode.l10n.t("Upload images success!")
+            matchedImages.push({
+              old: imagePath.path,
+              new: permalink,
+            });
+          }
+
+          let newMarkdownText = markdownText;
+          matchedImages.forEach((item) => {
+            newMarkdownText = newMarkdownText.replace(item.old, item.new);
+          });
+
+          await activeEditor.edit((editBuilder) => {
+            editBuilder.replace(
+              new vscode.Range(
+                document.positionAt(0),
+                document.positionAt(markdownText.length)
+              ),
+              newMarkdownText
+            );
+          });
+
+          await activeEditor.document.save();
+
+          if (matchedImages.length > 0) {
+            vscode.window.showInformationMessage(
+              vscode.l10n.t("Upload images success!")
+            );
+          }
+        }
       );
     }
   }

@@ -6,6 +6,7 @@
 - Exclude hidden attachment group when setup
 - Support batch pulling posts
 - Add publish parameters to Front-matter
+- Optimize the logic of picture upload
 
 ## 1.0.0
 
