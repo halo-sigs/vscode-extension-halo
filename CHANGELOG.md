@@ -1,6 +1,6 @@
 # Change Log
 
-[unreleased]
+## 1.1.0
 
 - Exclude deleted posts when pulling posts
 - Exclude hidden attachment group when setup
