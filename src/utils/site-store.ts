@@ -56,7 +56,8 @@ class SiteStore {
 
     sites.forEach((site) => (site.default = false));
 
-    sites.push(site);
+    // Currently only support one site
+    sites[0] = site;
 
     this.set(SITES_KEY, sites);
   }
