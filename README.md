@@ -33,6 +33,9 @@ Before using this extension, make sure you have the following prerequisites:
     - **vscode-extension-halo.publish**: Publish the Markdown file to Halo.
     - **vscode-extension-halo.pull**: Pull post from Halo to local Markdown file.
     - **vscode-extension-halo.upload-images**: Upload local images referenced in the Markdown file to Halo.
+    - **vscode-extension-halo.update**: Update post from Halo to local Markdown file.
+    - **vscode-extension-halo.set-categories**: Set categories for current post.
+    - **vscode-extension-halo.set-tags**: Set tags for current post.
 
 ## Contributing
 

@@ -33,6 +33,9 @@
     - **vscode-extension-halo.publish**：将 Markdown 文件发布到 Halo
     - **vscode-extension-halo.pull**：从 Halo 拉取文章到本地 Markdown 文件
     - **vscode-extension-halo.upload-images**：上传 Markdown 文件中引用的本地图片到 Halo
+    - **vscode-extension-halo.update**: 从 Halo 更新文章到本地 Markdown 文件
+    - **vscode-extension-halo.set-categories**: 设置当前文章的分类
+    - **vscode-extension-halo.set-tags**: 设置当前文章的标签
 
 ## 贡献
 
