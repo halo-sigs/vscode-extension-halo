@@ -1,8 +1,12 @@
 import {
+  Category,
+  CategoryList,
   ListedPost,
   ListedPostList,
   Policy,
   PostRequest,
+  Tag,
+  TagList,
 } from "@halo-dev/api-client";
 import axios, { AxiosInstance } from "axios";
 import * as vscode from "vscode";
@@ -108,40 +112,67 @@ class HaloService {
     params.content.raw = raw;
     params.content.content = new MarkdownIt().render(raw);
 
+    // restore metadata
+    if (matterData.title) {
+      params.post.spec.title = matterData.title;
+    }
+
+    if (matterData.categories) {
+      const categoryNames = await this.getCategoryNames(matterData.categories);
+      params.post.spec.categories = categoryNames;
+    }
+
+    if (matterData.tags) {
+      const tagNames = await this.getTagNames(matterData.tags);
+      params.post.spec.tags = tagNames;
+    }
+
     // Save post
-    if (params.post.metadata.name) {
-      await this.apiClient.put(
-        `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/content`,
-        params.content
-      );
-    } else {
-      const fileName = path
-        .basename(activeEditor.document.fileName)
-        .replace(".md", "");
-      params.post.metadata.name = randomUUID();
-      params.post.spec.title = fileName;
-      params.post.spec.slug = slugify(fileName, { trim: true });
+    try {
+      if (params.post.metadata.name) {
+        const { name } = params.post.metadata;
+        await this.apiClient.put(
+          `/apis/content.halo.run/v1alpha1/posts/${name}`,
+          params.post
+        );
+        await this.apiClient.put(
+          `/apis/api.console.halo.run/v1alpha1/posts/${name}/content`,
+          params.content
+        );
+      } else {
+        const fileName = path
+          .basename(activeEditor.document.fileName)
+          .replace(".md", "");
+        params.post.metadata.name = randomUUID();
+        params.post.spec.title = matterData.title || fileName;
+        params.post.spec.slug = slugify(fileName, { trim: true });
 
-      params.post = (
-        await this.apiClient.post(
-          `/apis/api.console.halo.run/v1alpha1/posts`,
-          params
-        )
-      ).data;
+        params.post = (
+          await this.apiClient.post(
+            `/apis/api.console.halo.run/v1alpha1/posts`,
+            params
+          )
+        ).data;
+      }
+
+      // Publish post
+      if (matterData.halo?.publish) {
+        await this.apiClient.put(
+          `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/publish`
+        );
+      } else {
+        await this.apiClient.put(
+          `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/unpublish`
+        );
+      }
+
+      params = (await this.getPost(params.post.metadata.name)) || params;
+    } catch (error) {
+      vscode.window.showErrorMessage(
+        vscode.l10n.t("Publish failed, please try again")
+      );
+      return;
     }
-
-    // Publish post
-    if (matterData.halo?.publish) {
-      await this.apiClient.put(
-        `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/publish`
-      );
-    } else {
-      await this.apiClient.put(
-        `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/unpublish`
-      );
-    }
-
-    params = (await this.getPost(params.post.metadata.name)) || params;
 
     const modifiedContent = mergeMatter(raw, {
       ...matterData,
@@ -285,6 +316,20 @@ class HaloService {
     return Promise.resolve(posts.items);
   }
 
+  public async getCategories(): Promise<Category[]> {
+    const { data: categories } = await this.apiClient.get<CategoryList>(
+      "/apis/content.halo.run/v1alpha1/categories"
+    );
+    return Promise.resolve(categories.items);
+  }
+
+  public async getTags(): Promise<Tag[]> {
+    const { data: tags } = await this.apiClient.get<TagList>(
+      "/apis/content.halo.run/v1alpha1/tags"
+    );
+    return Promise.resolve(tags.items);
+  }
+
   public async pullPost(name: string): Promise<void> {
     const post = await this.getPost(name);
 
@@ -310,7 +355,15 @@ class HaloService {
       }
     } catch {}
 
+    const postCategories = await this.getCategoryDisplayNames(
+      post.post.spec.categories
+    );
+    const postTags = await this.getTagDisplayNames(post.post.spec.tags);
+
     const modifiedContent = mergeMatter(post.content.raw + "", {
+      title: post.post.spec.title,
+      categories: postCategories,
+      tags: postTags,
       halo: {
         site: this.site.url,
         name: name,
@@ -381,6 +434,103 @@ class HaloService {
       };
       fetchPermalink();
     });
+  }
+
+  public async getCategoryNames(displayNames: string[]): Promise<string[]> {
+    const allCategories = await this.getCategories();
+
+    const notExistDisplayNames = displayNames.filter(
+      (name) => !allCategories.find((item) => item.spec.displayName === name)
+    );
+
+    const promises = notExistDisplayNames.map((name, index) =>
+      this.apiClient.post<Category>(
+        "/apis/content.halo.run/v1alpha1/categories",
+        {
+          spec: {
+            displayName: name,
+            slug: slugify(name, { trim: true }),
+            description: "",
+            cover: "",
+            template: "",
+            priority: allCategories.length + index,
+            children: [],
+          },
+          apiVersion: "content.halo.run/v1alpha1",
+          kind: "Category",
+          metadata: { name: "", generateName: "category-" },
+        }
+      )
+    );
+
+    const newCategories = await Promise.all(promises);
+
+    const existNames = displayNames
+      .map((name) => {
+        const found = allCategories.find(
+          (item) => item.spec.displayName === name
+        );
+        return found ? found.metadata.name : undefined;
+      })
+      .filter(Boolean) as string[];
+
+    return [
+      ...existNames,
+      ...newCategories.map((item) => item.data.metadata.name),
+    ];
+  }
+
+  public async getCategoryDisplayNames(names?: string[]): Promise<string[]> {
+    const categories = await this.getCategories();
+    return names
+      ?.map((name) => {
+        const found = categories.find((item) => item.metadata.name === name);
+        return found ? found.spec.displayName : undefined;
+      })
+      .filter(Boolean) as string[];
+  }
+
+  public async getTagNames(displayNames: string[]): Promise<string[]> {
+    const allTags = await this.getTags();
+
+    const notExistDisplayNames = displayNames.filter(
+      (name) => !allTags.find((item) => item.spec.displayName === name)
+    );
+
+    const promises = notExistDisplayNames.map((name) =>
+      this.apiClient.post<Tag>("/apis/content.halo.run/v1alpha1/tags", {
+        spec: {
+          displayName: name,
+          slug: slugify(name, { trim: true }),
+          color: "#ffffff",
+          cover: "",
+        },
+        apiVersion: "content.halo.run/v1alpha1",
+        kind: "Tag",
+        metadata: { name: "", generateName: "tag-" },
+      })
+    );
+
+    const newTags = await Promise.all(promises);
+
+    const existNames = displayNames
+      .map((name) => {
+        const found = allTags.find((item) => item.spec.displayName === name);
+        return found ? found.metadata.name : undefined;
+      })
+      .filter(Boolean) as string[];
+
+    return [...existNames, ...newTags.map((item) => item.data.metadata.name)];
+  }
+
+  public async getTagDisplayNames(names?: string[]): Promise<string[]> {
+    const tags = await this.getTags();
+    return names
+      ?.map((name) => {
+        const found = tags.find((item) => item.metadata.name === name);
+        return found ? found.spec.displayName : undefined;
+      })
+      .filter(Boolean) as string[];
   }
 }
 

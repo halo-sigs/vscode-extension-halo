@@ -7,6 +7,7 @@
 - Support batch pulling posts
 - Add publish parameters to Front-matter
 - Optimize the logic of picture upload
+- Support setting categories, tags and title
 
 ## 1.0.0
 

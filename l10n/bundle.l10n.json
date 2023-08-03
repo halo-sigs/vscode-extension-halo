@@ -21,5 +21,7 @@
   "Please select a post": "Please select a post",
   "Publishing...": "Publishing...",
   "Published": "Published",
-  "Draft": "Draft"
+  "Draft": "Draft",
+  "Publish failed, please try again": "Publish failed, please try again",
+  "Pulling posts...": "Pulling posts..."
 }

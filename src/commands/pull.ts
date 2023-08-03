@@ -15,7 +15,9 @@ async function fetchPosts(): Promise<HaloPostQuickPickItem[]> {
   return posts.map((item) => {
     return {
       label: item.post.spec.title,
-      description: vscode.l10n.t(item.post.spec.publish ? "Published" : "Draft"),
+      description: vscode.l10n.t(
+        item.post.spec.publish ? "Published" : "Draft"
+      ),
       name: item.post.metadata.name,
     };
   });
@@ -37,7 +39,21 @@ export default async () => {
     return;
   }
 
-  items.forEach((item) => {
-    service.pullPost(item.name);
-  });
+  await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: vscode.l10n.t("Pulling posts..."),
+      cancellable: true,
+    },
+    async (process) => {
+      for (const item of items) {
+        process.report({
+          message: item.label,
+          increment: 100 / items.length,
+        });
+
+        await service.pullPost(item.name);
+      }
+    }
+  );
 };
