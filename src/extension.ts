@@ -5,6 +5,7 @@ import publish from "./commands/publish";
 import pull from "./commands/pull";
 import uploadImages from "./commands/upload-images";
 import setup from "./commands/setup";
+import update from "./commands/update";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -29,10 +30,16 @@ export function activate(context: vscode.ExtensionContext) {
     uploadImages
   );
 
+  const updateCommand = vscode.commands.registerCommand(
+    "vscode-extension-halo.update",
+    update
+  );
+
   context.subscriptions.push(setupCommand);
   context.subscriptions.push(publishCommand);
   context.subscriptions.push(pullCommand);
   context.subscriptions.push(uploadImagesCommand);
+  context.subscriptions.push(updateCommand);
 }
 
 // This method is called when your extension is deactivated

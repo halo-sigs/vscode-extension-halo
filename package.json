@@ -51,6 +51,10 @@
       {
         "command": "vscode-extension-halo.upload-images",
         "title": "%vscode-extension-halo.upload-images%"
+      },
+      {
+        "command": "vscode-extension-halo.update",
+        "title": "%vscode-extension-halo.update%"
       }
     ]
   },

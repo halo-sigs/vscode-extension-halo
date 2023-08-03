@@ -23,5 +23,7 @@
   "Published": "已发布",
   "Draft": "未发布",
   "Publish failed, please try again": "发布失败，请重试",
-  "Pulling posts...": "正在拉取文章..."
+  "Pulling posts...": "正在拉取文章...",
+  "Please publish the post first": "请先发布此文章",
+  "Post updated": "文章已更新"
 }

@@ -197,6 +197,8 @@ class HaloService {
 
     await activeEditor.document.save();
 
+    await this.updatePost();
+
     const item: vscode.MessageItem = {
       title: vscode.l10n.t("Open in browser"),
     };
@@ -210,6 +212,61 @@ class HaloService {
           );
         }
       });
+  }
+
+  public async updatePost(): Promise<void> {
+    const activeEditor = vscode.window.activeTextEditor;
+    if (!activeEditor) {
+      return;
+    }
+
+    await activeEditor.document.save();
+
+    const { data: matterData } = readMatter(activeEditor.document.getText());
+
+    if (!matterData.halo?.name) {
+      vscode.window.showErrorMessage(
+        vscode.l10n.t("Please publish the post first")
+      );
+      return;
+    }
+
+    const post = await this.getPost(matterData.halo.name);
+
+    if (!post) {
+      vscode.window.showErrorMessage(vscode.l10n.t("Post not found"));
+      return;
+    }
+
+    const postCategories = await this.getCategoryDisplayNames(
+      post.post.spec.categories
+    );
+    const postTags = await this.getTagDisplayNames(post.post.spec.tags);
+
+    const modifiedContent = mergeMatter(post.content.raw + "", {
+      title: post.post.spec.title,
+      categories: postCategories,
+      tags: postTags,
+      halo: {
+        site: this.site.url,
+        name: post.post.metadata.name,
+        publish: post.post.spec.publish,
+      },
+    });
+
+    await activeEditor.edit((editBuilder) => {
+      editBuilder.replace(
+        new vscode.Range(
+          activeEditor.document.positionAt(0),
+          activeEditor.document.positionAt(
+            activeEditor.document.getText().length
+          )
+        ),
+        modifiedContent
+      );
+    });
+
+    await activeEditor.document.save();
   }
 
   public async uploadImages(): Promise<void> {

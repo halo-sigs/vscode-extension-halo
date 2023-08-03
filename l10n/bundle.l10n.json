@@ -23,5 +23,7 @@
   "Published": "Published",
   "Draft": "Draft",
   "Publish failed, please try again": "Publish failed, please try again",
-  "Pulling posts...": "Pulling posts..."
+  "Pulling posts...": "Pulling posts...",
+  "Please publish the post first": "Please publish the post first",
+  "Post updated": "Post updated"
 }
