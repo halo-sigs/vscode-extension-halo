@@ -9,6 +9,7 @@
 - Optimize the logic of picture upload
 - Support setting categories, tags and title
 - Support updating post from halo remote
+- Check whether the site matches when publishing
 
 ## 1.0.0
 

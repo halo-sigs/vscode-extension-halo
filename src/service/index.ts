@@ -104,6 +104,12 @@ class HaloService {
       activeEditor.document.getText()
     );
 
+    // check site url
+    if (matterData.halo?.site && matterData.halo.site !== this.site.url) {
+      vscode.window.showErrorMessage(vscode.l10n.t("Site url is not matched"));
+      return;
+    }
+
     if (matterData.halo?.name) {
       const post = await this.getPost(matterData.halo.name);
       params = post ? post : params;

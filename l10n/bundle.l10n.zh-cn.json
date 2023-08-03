@@ -25,5 +25,6 @@
   "Publish failed, please try again": "发布失败，请重试",
   "Pulling posts...": "正在拉取文章...",
   "Please publish the post first": "请先发布此文章",
-  "Post updated": "文章已更新"
+  "Post updated": "文章已更新",
+  "Site url is not matched": "站点地址不匹配"
 }
