@@ -116,7 +116,13 @@ class HaloService {
     }
 
     params.content.raw = raw;
-    params.content.content = new MarkdownIt().render(raw);
+    params.content.content = new MarkdownIt({
+      html: true,
+      xhtmlOut: true,
+      breaks: true,
+      linkify: true,
+      typographer: true,
+    }).render(raw);
 
     // restore metadata
     if (matterData.title) {

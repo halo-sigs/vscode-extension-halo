@@ -11,6 +11,7 @@
 - Support updating post from halo remote
 - Check whether the site matches when publishing
 - Support to set categories and tags by selection
+- Allow insert html code
 
 ## 1.0.0
 
