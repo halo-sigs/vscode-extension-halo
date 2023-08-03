@@ -6,6 +6,8 @@ import pull from "./commands/pull";
 import uploadImages from "./commands/upload-images";
 import setup from "./commands/setup";
 import update from "./commands/update";
+import setCategories from "./commands/set-categories";
+import setTags from "./commands/set-tags";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -35,11 +37,23 @@ export function activate(context: vscode.ExtensionContext) {
     update
   );
 
+  const setCategoriesCommand = vscode.commands.registerCommand(
+    "vscode-extension-halo.set-categories",
+    setCategories
+  );
+
+  const setTagsCommand = vscode.commands.registerCommand(
+    "vscode-extension-halo.set-tags",
+    setTags
+  );
+
   context.subscriptions.push(setupCommand);
   context.subscriptions.push(publishCommand);
   context.subscriptions.push(pullCommand);
   context.subscriptions.push(uploadImagesCommand);
   context.subscriptions.push(updateCommand);
+  context.subscriptions.push(setCategoriesCommand);
+  context.subscriptions.push(setTagsCommand);
 }
 
 // This method is called when your extension is deactivated

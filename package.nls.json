@@ -3,5 +3,7 @@
   "vscode-extension-halo.publish": "Halo: Publish to Halo",
   "vscode-extension-halo.pull": "Halo: Pull post from Halo",
   "vscode-extension-halo.update": "Halo: Update post from Halo",
-  "vscode-extension-halo.upload-images": "Halo: Upload all images to Halo"
+  "vscode-extension-halo.upload-images": "Halo: Upload all images to Halo",
+  "vscode-extension-halo.set-categories": "Halo: Set categories",
+  "vscode-extension-halo.set-tags": "Halo: Set tags"
 }

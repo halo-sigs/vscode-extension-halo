@@ -55,6 +55,14 @@
       {
         "command": "vscode-extension-halo.update",
         "title": "%vscode-extension-halo.update%"
+      },
+      {
+        "command": "vscode-extension-halo.set-categories",
+        "title": "%vscode-extension-halo.set-categories%"
+      },
+      {
+        "command": "vscode-extension-halo.set-tags",
+        "title": "%vscode-extension-halo.set-tags%"
       }
     ]
   },

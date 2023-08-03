@@ -10,6 +10,7 @@
 - Support setting categories, tags and title
 - Support updating post from halo remote
 - Check whether the site matches when publishing
+- Support to set categories and tags by selection
 
 ## 1.0.0
 
