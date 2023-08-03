@@ -2,8 +2,8 @@
   "vscode-extension-halo.setup": "Halo：初始化",
   "vscode-extension-halo.publish": "Halo：发布当前文档到 Halo",
   "vscode-extension-halo.pull": "Halo：从 Halo 拉取文章",
-  "vscode-extension-halo.update": "Halo: 从 Halo 更新当前文档",
+  "vscode-extension-halo.update": "Halo：从 Halo 更新当前文档",
   "vscode-extension-halo.upload-images": "Halo：上传此文档的图片到 Halo",
-  "vscode-extension-halo.set-categories": "Halo: 设置当前文档的分类",
-  "vscode-extension-halo.set-tags": "Halo: 设置当前文档的标签"
+  "vscode-extension-halo.set-categories": "Halo：设置当前文档的分类",
+  "vscode-extension-halo.set-tags": "Halo：设置当前文档的标签"
 }
