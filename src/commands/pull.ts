@@ -15,7 +15,7 @@ async function fetchPosts(): Promise<HaloPostQuickPickItem[]> {
   return posts.map((item) => {
     return {
       label: item.post.spec.title,
-      description: item.post.spec.slug,
+      description: vscode.l10n.t(item.post.spec.publish ? "Published" : "Draft"),
       name: item.post.metadata.name,
     };
   });

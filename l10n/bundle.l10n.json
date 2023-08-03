@@ -19,5 +19,7 @@
   "Setup Success": "Setup Success",
   "Setup Failed, Please check your site url, username and password": "Setup Failed, Please check your site url, username and password",
   "Please select a post": "Please select a post",
-  "Publishing...": "Publishing..."
+  "Publishing...": "Publishing...",
+  "Published": "Published",
+  "Draft": "Draft"
 }

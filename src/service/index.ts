@@ -58,7 +58,7 @@ class HaloService {
       return;
     }
 
-    let requestParams: PostRequest = {
+    let params: PostRequest = {
       post: {
         spec: {
           title: "",
@@ -100,42 +100,53 @@ class HaloService {
 
     if (matterData.halo?.name) {
       const post = await this.getPost(matterData.halo.name);
-      requestParams = post ? post : requestParams;
+      params = post ? post : params;
     }
 
-    requestParams.content.raw = raw;
-    requestParams.content.content = new MarkdownIt().render(raw);
+    params.content.raw = raw;
+    params.content.content = new MarkdownIt().render(raw);
 
-    if (requestParams.post.metadata.name) {
+    // Save post
+    if (params.post.metadata.name) {
       await this.apiClient.put(
-        `/apis/api.console.halo.run/v1alpha1/posts/${requestParams.post.metadata.name}/content`,
-        requestParams.content
+        `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/content`,
+        params.content
       );
     } else {
       const fileName = path
         .basename(activeEditor.document.fileName)
         .replace(".md", "");
-      requestParams.post.metadata.name = randomUUID();
-      requestParams.post.spec.title = fileName;
-      requestParams.post.spec.slug = slugify(fileName, { trim: true });
+      params.post.metadata.name = randomUUID();
+      params.post.spec.title = fileName;
+      params.post.spec.slug = slugify(fileName, { trim: true });
 
-      requestParams.post = (
+      params.post = (
         await this.apiClient.post(
           `/apis/api.console.halo.run/v1alpha1/posts`,
-          requestParams
+          params
         )
       ).data;
     }
 
-    await this.apiClient.put(
-      `/apis/api.console.halo.run/v1alpha1/posts/${requestParams.post.metadata.name}/publish`
-    );
+    // Publish post
+    if (matterData.halo?.publish) {
+      await this.apiClient.put(
+        `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/publish`
+      );
+    } else {
+      await this.apiClient.put(
+        `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/unpublish`
+      );
+    }
+
+    params = (await this.getPost(params.post.metadata.name)) || params;
 
     const modifiedContent = mergeMatter(raw, {
       ...matterData,
       halo: {
         site: this.site.url,
-        name: requestParams.post.metadata.name,
+        name: params.post.metadata.name,
+        publish: params.post.spec.publish,
       },
     });
 
@@ -156,14 +167,13 @@ class HaloService {
     const item: vscode.MessageItem = {
       title: vscode.l10n.t("Open in browser"),
     };
+
     vscode.window
       .showInformationMessage(vscode.l10n.t("Publish success!"), item)
       .then((selectedItem) => {
         if (selectedItem === item) {
           vscode.env.openExternal(
-            vscode.Uri.parse(
-              `${this.site.url}${requestParams.post.status?.permalink}`
-            )
+            vscode.Uri.parse(`${this.site.url}${params.post.status?.permalink}`)
           );
         }
       });
@@ -270,6 +280,7 @@ class HaloService {
       halo: {
         site: this.site.url,
         name: name,
+        publish: post.post.spec.publish,
       },
     });
 
