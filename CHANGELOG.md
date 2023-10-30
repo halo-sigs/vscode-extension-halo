@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.0
+
+- Add anchor feature for markdown renderer
+
 ## 1.1.0
 
 - Exclude deleted posts when pulling posts
