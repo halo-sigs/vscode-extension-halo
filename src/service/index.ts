@@ -11,13 +11,13 @@ import {
 import axios, { AxiosInstance } from "axios";
 import * as vscode from "vscode";
 import { mergeMatter, readMatter } from "../utils/yaml";
-import MarkdownIt = require("markdown-it");
 import path = require("path");
 import { randomUUID } from "crypto";
 import { slugify } from "transliteration";
 import * as FormData from "form-data";
 import * as fs from "fs";
 import { Site } from "../utils/site-store";
+import markdownIt from "../utils/markdown";
 
 class HaloService {
   private readonly site: Site;
@@ -116,13 +116,7 @@ class HaloService {
     }
 
     params.content.raw = raw;
-    params.content.content = new MarkdownIt({
-      html: true,
-      xhtmlOut: true,
-      breaks: true,
-      linkify: true,
-      typographer: true,
-    }).render(raw);
+    params.content.content = markdownIt.render(raw);
 
     // restore metadata
     if (matterData.title) {
