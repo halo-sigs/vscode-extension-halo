@@ -1,6 +1,12 @@
-# Halo integration for Visual Studio Code
+# VSCode 发布插件
 
 用于将 Markdown 文件发布到 [Halo](https://github.com/halo-dev/halo) 的 Visual Studio Code 插件
+
+[English](./README.md)
+
+## 预览
+
+![Preview](./images/preview-zh.png)
 
 ## 功能
 

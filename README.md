@@ -2,6 +2,12 @@
 
 Visual Studio Code extension for publishing Markdown files to [Halo](https://github.com/halo-dev/halo)
 
+[中文文档](./README.zh-CN.md)
+
+## Preview
+
+![Preview](./images/preview-en.png)
+
 ## Features
 
 - Publish Markdown files to Halo.
