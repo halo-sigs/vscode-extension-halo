@@ -2,12 +2,7 @@ import Preferences = require("preferences");
 
 export interface Site {
   url: string;
-  username: string;
-  password: string;
-  attachment: {
-    policy: string;
-    group: string;
-  };
+  pat: string;
   default: boolean;
 }
 
@@ -16,6 +11,7 @@ const SITES_KEY = "sites";
 
 class SiteStore {
   private readonly preferences: Preferences;
+
   constructor() {
     this.preferences = new Preferences(PREFERENCES_KEY);
   }

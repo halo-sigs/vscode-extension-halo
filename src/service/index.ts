@@ -1,55 +1,83 @@
 import {
   Category,
   CategoryList,
+  Content,
   ListedPost,
-  ListedPostList,
-  Policy,
-  PostRequest,
+  Post,
   Tag,
   TagList,
+  UcApiContentHaloRunV1alpha1AttachmentApi,
+  UcApiContentHaloRunV1alpha1PostApi,
 } from "@halo-dev/api-client";
 import axios, { AxiosInstance } from "axios";
 import * as vscode from "vscode";
 import { mergeMatter, readMatter } from "../utils/yaml";
-import path = require("path");
 import { randomUUID } from "crypto";
 import { slugify } from "transliteration";
-import * as FormData from "form-data";
 import * as fs from "fs";
+import { File } from "buffer";
+import { fileTypeFromFile } from "file-type";
 import { Site } from "../utils/site-store";
 import markdownIt from "../utils/markdown";
+import path = require("path");
 
 class HaloService {
   private readonly site: Site;
   private readonly apiClient: AxiosInstance;
+  private readonly postApi: UcApiContentHaloRunV1alpha1PostApi;
+  private readonly attachmentApi: UcApiContentHaloRunV1alpha1AttachmentApi;
 
   constructor(site?: Site) {
     if (!site) {
       throw new Error(vscode.l10n.t("No site found"));
     }
     this.site = site;
-    this.apiClient = axios.create({
+    const axiosInstance = axios.create({
       baseURL: site.url,
-      auth: {
-        username: site.username,
-        password: site.password,
+      headers: {
+        Authorization: `Bearer ${site.pat}`,
       },
     });
+    this.apiClient = axiosInstance;
+    this.postApi = new UcApiContentHaloRunV1alpha1PostApi(
+      undefined,
+      site.url,
+      axiosInstance
+    );
+    this.attachmentApi = new UcApiContentHaloRunV1alpha1AttachmentApi(
+      undefined,
+      site.url,
+      axiosInstance
+    );
   }
 
-  public async getPost(name: string): Promise<PostRequest | undefined> {
+  public async getPost(
+    name: string
+  ): Promise<{ post: Post; content: Content } | undefined> {
     try {
-      const post = await this.apiClient.get(
-        `/apis/content.halo.run/v1alpha1/posts/${name}`
-      );
+      const { data: post } = await this.postApi.getMyPost({ name });
 
-      const content = await this.apiClient.get(
-        `/apis/api.console.halo.run/v1alpha1/posts/${name}/head-content`
-      );
+      const { data: snapshot } = await this.postApi.getMyPostDraft({
+        name,
+        patched: true,
+      });
+
+      const {
+        "content.halo.run/patched-content": patchedContent,
+        "content.halo.run/patched-raw": patchedRaw,
+      } = snapshot.metadata.annotations || {};
+
+      const { rawType } = snapshot.spec || {};
+
+      const content: Content = {
+        content: patchedContent,
+        raw: patchedRaw,
+        rawType,
+      };
 
       return Promise.resolve({
-        post: post.data,
-        content: content.data,
+        post: post,
+        content: content,
       });
     } catch (error) {
       return Promise.resolve(undefined);
@@ -64,40 +92,43 @@ class HaloService {
 
     await activeEditor.document.save();
 
-    let params: PostRequest = {
-      post: {
-        spec: {
-          title: "",
-          slug: "",
-          template: "",
-          cover: "",
-          deleted: false,
-          publish: false,
-          publishTime: undefined,
-          pinned: false,
-          allowComment: true,
-          visible: "PUBLIC",
-          priority: 0,
-          excerpt: {
-            autoGenerate: true,
-            raw: "",
-          },
-          categories: [],
-          tags: [],
-          htmlMetas: [],
-        },
-        apiVersion: "content.halo.run/v1alpha1",
-        kind: "Post",
-        metadata: {
-          name: "",
-          annotations: {},
-        },
+    let params: Post = {
+      apiVersion: "content.halo.run/v1alpha1",
+      kind: "Post",
+      metadata: {
+        annotations: {},
+        name: "",
       },
-      content: {
-        raw: "",
-        content: "",
-        rawType: "markdown",
+      spec: {
+        allowComment: true,
+        baseSnapshot: "",
+        categories: [],
+        cover: "",
+        deleted: false,
+        excerpt: {
+          autoGenerate: true,
+          raw: "",
+        },
+        headSnapshot: "",
+        htmlMetas: [],
+        owner: "",
+        pinned: false,
+        priority: 0,
+        publish: false,
+        publishTime: "",
+        releaseSnapshot: "",
+        slug: "",
+        tags: [],
+        template: "",
+        title: "",
+        visible: "PUBLIC",
       },
+    };
+
+    let content: Content = {
+      rawType: "markdown",
+      raw: "",
+      content: "",
     };
 
     const { content: raw, data: matterData } = readMatter(
@@ -110,69 +141,90 @@ class HaloService {
       return;
     }
 
+    // fetch post
     if (matterData.halo?.name) {
       const post = await this.getPost(matterData.halo.name);
-      params = post ? post : params;
+
+      if (post) {
+        params = post.post;
+        content = post.content;
+      }
     }
 
-    params.content.raw = raw;
-    params.content.content = markdownIt.render(raw);
+    content.raw = raw;
+    content.content = markdownIt.render(raw);
 
     // restore metadata
     if (matterData.title) {
-      params.post.spec.title = matterData.title;
+      params.spec.title = matterData.title;
     }
 
     if (matterData.categories) {
       const categoryNames = await this.getCategoryNames(matterData.categories);
-      params.post.spec.categories = categoryNames;
+      params.spec.categories = categoryNames;
     }
 
     if (matterData.tags) {
       const tagNames = await this.getTagNames(matterData.tags);
-      params.post.spec.tags = tagNames;
+      params.spec.tags = tagNames;
     }
 
-    // Save post
     try {
-      if (params.post.metadata.name) {
-        const { name } = params.post.metadata;
-        await this.apiClient.put(
-          `/apis/content.halo.run/v1alpha1/posts/${name}`,
-          params.post
-        );
-        await this.apiClient.put(
-          `/apis/api.console.halo.run/v1alpha1/posts/${name}/content`,
-          params.content
-        );
+      // Update post
+      if (params.metadata.name) {
+        const { name } = params.metadata;
+
+        await this.postApi.updateMyPost({ name: name, post: params });
+
+        const { data: snapshot } = await this.postApi.getMyPostDraft({
+          name,
+          patched: true,
+        });
+
+        snapshot.metadata.annotations = {
+          ...snapshot.metadata.annotations,
+          "content.halo.run/content-json": JSON.stringify(content),
+        };
+
+        await this.postApi.updateMyPostDraft({
+          name,
+          snapshot,
+        });
       } else {
+        // Create a new post
         const fileName = path
           .basename(activeEditor.document.fileName)
           .replace(".md", "");
-        params.post.metadata.name = randomUUID();
-        params.post.spec.title = matterData.title || fileName;
-        params.post.spec.slug = slugify(fileName, { trim: true });
+        params.metadata.name = randomUUID();
+        params.spec.title = matterData.title || fileName;
+        params.spec.slug = slugify(fileName, { trim: true });
 
-        params.post = (
-          await this.apiClient.post(
-            `/apis/api.console.halo.run/v1alpha1/posts`,
-            params
-          )
-        ).data;
+        params.metadata.annotations = {
+          ...params.metadata.annotations,
+          "content.halo.run/content-json": JSON.stringify(content),
+        };
+
+        const { data: newPost } = await this.postApi.createMyPost({
+          post: params,
+        });
+
+        params = newPost;
       }
 
       // Publish post
       if (matterData.halo?.publish) {
-        await this.apiClient.put(
-          `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/publish`
-        );
+        await this.postApi.publishMyPost({ name: params.metadata.name });
       } else {
-        await this.apiClient.put(
-          `/apis/api.console.halo.run/v1alpha1/posts/${params.post.metadata.name}/unpublish`
-        );
+        await this.postApi.unpublishMyPost({ name: params.metadata.name });
       }
 
-      params = (await this.getPost(params.post.metadata.name)) || params;
+      // Fetch new post and content
+      const latestPost = await this.getPost(params.metadata.name);
+
+      if (latestPost) {
+        params = latestPost.post;
+        content = latestPost.content;
+      }
     } catch (error) {
       vscode.window.showErrorMessage(
         vscode.l10n.t("Publish failed, please try again")
@@ -184,8 +236,8 @@ class HaloService {
       ...matterData,
       halo: {
         site: this.site.url,
-        name: params.post.metadata.name,
-        publish: params.post.spec.publish,
+        name: params.metadata.name,
+        publish: params.spec.publish,
       },
     });
 
@@ -214,7 +266,7 @@ class HaloService {
       .then((selectedItem) => {
         if (selectedItem === item) {
           vscode.env.openExternal(
-            vscode.Uri.parse(`${this.site.url}${params.post.status?.permalink}`)
+            vscode.Uri.parse(`${this.site.url}${params.status?.permalink}`)
           );
         }
       });
@@ -288,6 +340,13 @@ class HaloService {
 
       await activeEditor.document.save();
 
+      const { data: matterData } = readMatter(activeEditor.document.getText());
+
+      // We need publish post first, then we can upload images
+      if (!matterData.halo?.name) {
+        await this.publishPost();
+      }
+
       const markdownText = document.getText();
       const imageRegex = /!\[.*?\]\((.*?)\)/g;
 
@@ -332,7 +391,10 @@ class HaloService {
               increment: (100 / imagePaths.length) * (i + 1),
             });
 
-            const permalink = await this.uploadImage(imagePath.absolutePath);
+            const permalink = await this.uploadImage(
+              imagePath.absolutePath,
+              matterData.halo.name
+            );
 
             matchedImages.push({
               old: imagePath.path,
@@ -368,14 +430,9 @@ class HaloService {
   }
 
   public async getPosts(): Promise<ListedPost[]> {
-    const { data: posts } = await this.apiClient.get<ListedPostList>(
-      "/apis/api.console.halo.run/v1alpha1/posts",
-      {
-        params: {
-          labelSelector: "content.halo.run/deleted=false",
-        },
-      }
-    );
+    const { data: posts } = await this.postApi.listMyPosts({
+      labelSelector: [ "content.halo.run/deleted=false" ],
+    });
     return Promise.resolve(posts.items);
   }
 
@@ -416,7 +473,8 @@ class HaloService {
         vscode.window.showErrorMessage(vscode.l10n.t("File already exists"));
         return;
       }
-    } catch {}
+    } catch {
+    }
 
     const postCategories = await this.getCategoryDisplayNames(
       post.post.spec.categories
@@ -442,61 +500,30 @@ class HaloService {
     await vscode.window.showTextDocument(doc);
   }
 
-  public async uploadImage(file: string): Promise<string> {
-    const imageBuffer = fs.readFileSync(decodeURIComponent(file));
+  public async uploadImage(file: string, postName: string): Promise<string> {
+    const fileType = await fileTypeFromFile(file);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", imageBuffer, {
-        filename: path.basename(decodeURIComponent(file)),
-      });
-      formData.append("policyName", this.site.attachment.policy);
-      formData.append("groupName", this.site.attachment.group);
-
-      const response = await this.apiClient.post(
-        "/apis/api.console.halo.run/v1alpha1/attachments/upload",
-        formData,
-        {
-          headers: formData.getHeaders(),
-        }
-      );
-
-      const permalink = await this.getAttachmentPermalink(
-        response.data.metadata.name
-      );
-
-      return permalink;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      return "";
-    }
-  }
-
-  public async getAttachmentPermalink(name: string): Promise<string> {
-    const { data: policy } = await this.apiClient.get<Policy>(
-      `/apis/storage.halo.run/v1alpha1/policies/${this.site.attachment.policy}`
+    const fileBlob = new File(
+      [ fs.readFileSync(decodeURIComponent(file)) ],
+      path.basename(file),
+      {
+        type: fileType?.mime,
+      }
     );
 
-    return new Promise((resolve, reject) => {
-      const fetchPermalink = () => {
-        this.apiClient
-          .get(`/apis/storage.halo.run/v1alpha1/attachments/${name}`)
-          .then((response) => {
-            const permalink = response.data.status.permalink;
-            if (permalink) {
-              if (policy.spec.templateName === "local") {
-                resolve(`${this.site.url}${permalink}`);
-              } else {
-                resolve(permalink);
-              }
-            } else {
-              setTimeout(fetchPermalink, 1000);
-            }
-          })
-          .catch((error) => reject(error));
-      };
-      fetchPermalink();
-    });
+    try {
+      const { data: attachment } =
+        await this.attachmentApi.createAttachmentForPost({
+          file: fileBlob,
+          postName,
+          waitForPermalink: true,
+        });
+
+      return this.site.url + attachment.status?.permalink || file;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return file;
+    }
   }
 
   public async getCategoryNames(displayNames: string[]): Promise<string[]> {
@@ -583,7 +610,7 @@ class HaloService {
       })
       .filter(Boolean) as string[];
 
-    return [...existNames, ...newTags.map((item) => item.data.metadata.name)];
+    return [ ...existNames, ...newTags.map((item) => item.data.metadata.name) ];
   }
 
   public async getTagDisplayNames(names?: string[]): Promise<string[]> {

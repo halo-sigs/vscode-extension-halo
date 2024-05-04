@@ -17,7 +17,7 @@ export default async () => {
         cancellable: false,
       },
       async () => {
-        service.publishPost();
+        await service.publishPost();
       }
     );
   }
