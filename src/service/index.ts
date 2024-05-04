@@ -159,6 +159,10 @@ class HaloService {
       params.spec.title = matterData.title;
     }
 
+    if (matterData.slug) {
+      params.spec.slug = matterData.slug;
+    }
+
     if (matterData.categories) {
       const categoryNames = await this.getCategoryNames(matterData.categories);
       params.spec.categories = categoryNames;
@@ -197,7 +201,7 @@ class HaloService {
           .replace(".md", "");
         params.metadata.name = randomUUID();
         params.spec.title = matterData.title || fileName;
-        params.spec.slug = slugify(fileName, { trim: true });
+        params.spec.slug = matterData.slug || slugify(fileName, { trim: true });
 
         params.metadata.annotations = {
           ...params.metadata.annotations,
@@ -303,6 +307,7 @@ class HaloService {
 
     const modifiedContent = mergeMatter(post.content.raw + "", {
       title: post.post.spec.title,
+      slug: post.post.spec.slug,
       categories: postCategories,
       tags: postTags,
       halo: {
@@ -473,8 +478,7 @@ class HaloService {
         vscode.window.showErrorMessage(vscode.l10n.t("File already exists"));
         return;
       }
-    } catch {
-    }
+    } catch {}
 
     const postCategories = await this.getCategoryDisplayNames(
       post.post.spec.categories
@@ -483,6 +487,7 @@ class HaloService {
 
     const modifiedContent = mergeMatter(post.content.raw + "", {
       title: post.post.spec.title,
+      slug: post.post.spec.slug,
       categories: postCategories,
       tags: postTags,
       halo: {
