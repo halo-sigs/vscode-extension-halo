@@ -36,7 +36,7 @@
    1. 站点地址: Halo 网站的访问地址，示例：`https://example.com`
    2. 个人令牌:
 
-       Halo 网站的个人令牌，需要 `允许管理自己的文章` 的权限
+       Halo 网站的个人令牌，需要 `文章管理` 的权限
 
        ![PAT](./images/pat-zh.png)
 

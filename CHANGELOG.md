@@ -2,6 +2,8 @@
 
 ## next
 
+⚠️ Due to changes in the api authentication method in this version, it is necessary to rerun `Halo Setup`.
+
 - Log in with Personal Access Token instead of password
 - Refactor post related api
 - Support setting of slug, excerpt and cover in Front Matter

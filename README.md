@@ -36,7 +36,7 @@ Before using this extension, make sure you have the following prerequisites:
    1. Site url: The URL of your Halo site, e.g. `https://example.com`
    2. Personal access token:
 
-       The personal access token of your Halo site, needs `Allows you to manage your own posts` permission.
+       The personal access token of your Halo site, needs `Post Manage` permission.
 
        ![PAT](./images/pat-en.png)
 
