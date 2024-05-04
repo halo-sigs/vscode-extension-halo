@@ -163,6 +163,15 @@ class HaloService {
       params.spec.slug = matterData.slug;
     }
 
+    if (matterData.excerpt) {
+      params.spec.excerpt.raw = matterData.excerpt;
+      params.spec.excerpt.autoGenerate = false;
+    }
+
+    if (matterData.cover) {
+      params.spec.cover = matterData.cover;
+    }
+
     if (matterData.categories) {
       const categoryNames = await this.getCategoryNames(matterData.categories);
       params.spec.categories = categoryNames;
@@ -308,6 +317,10 @@ class HaloService {
     const modifiedContent = mergeMatter(post.content.raw + "", {
       title: post.post.spec.title,
       slug: post.post.spec.slug,
+      excerpt: post.post.spec.excerpt.autoGenerate
+        ? undefined
+        : post.post.spec.excerpt.raw,
+      cover: post.post.spec.cover || undefined,
       categories: postCategories,
       tags: postTags,
       halo: {
@@ -488,6 +501,10 @@ class HaloService {
     const modifiedContent = mergeMatter(post.content.raw + "", {
       title: post.post.spec.title,
       slug: post.post.spec.slug,
+      excerpt: post.post.spec.excerpt.autoGenerate
+        ? undefined
+        : post.post.spec.excerpt.raw,
+      cover: post.post.spec.cover || undefined,
       categories: postCategories,
       tags: postTags,
       halo: {
