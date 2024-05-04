@@ -68,8 +68,8 @@
   },
   "activationEvents": [],
   "dependencies": {
-    "@halo-dev/api-client": "^2.10.0",
-    "axios": "^1.6.0",
+    "@halo-dev/api-client": "^2.15.0",
+    "axios": "^1.6.8",
     "form-data": "^4.0.0",
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.0",
