@@ -550,6 +550,10 @@ class HaloService {
           waitForPermalink: true,
         });
 
+      if (attachment.status?.permalink?.startsWith("http")) {
+        return attachment.status?.permalink;
+      }
+
       return this.site.url + attachment.status?.permalink || file;
     } catch (error) {
       console.error("Error uploading image:", error);
