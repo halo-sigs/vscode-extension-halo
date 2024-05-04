@@ -1,6 +1,6 @@
 # Change Log
 
-## next
+## 1.3.0
 
 ⚠️ Due to changes in the api authentication method in this version, it is necessary to rerun `Halo Setup`.
 
