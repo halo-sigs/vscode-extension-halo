@@ -1,5 +1,12 @@
 # Change Log
 
+## next
+
+- Log in with Personal Access Token instead of password
+- Refactor post related api
+- Support setting of slug, excerpt and cover in Front Matter
+- Add publishByDefault option
+
 ## 1.2.0
 
 - Add anchor feature for markdown renderer
