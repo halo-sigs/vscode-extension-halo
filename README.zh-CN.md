@@ -33,7 +33,16 @@
 
 1. 打开命令面板，搜索 Halo 初始化
 2. 根据提示填写 Halo 网站的相关信息
-3. 打开一个 Markdown 文件，然后打开命令面板，搜索 Halo 发布。选择后，该文件将被发布到 Halo 网站。
+   1. 站点地址: Halo 网站的访问地址，示例：`https://example.com`
+   2. 个人令牌:
+
+       Halo 网站的个人令牌，需要 `允许管理自己的文章` 的权限
+
+       ![PAT](./images/pat-zh.png)
+
+       更多关于个人令牌的文档可查阅: [个人令牌](https://docs.halo.run/user-guide/user-center#%E4%B8%AA%E4%BA%BA%E4%BB%A4%E7%89%8C)
+
+3. 打开一个 Markdown 文件，然后打开命令面板，搜索 Halo 发布。选择后，该文件将被发布到 Halo 网站
 4. 所有可用的命令：
     - **vscode-extension-halo.setup**：设置 Halo 网站信息
     - **vscode-extension-halo.publish**：将 Markdown 文件发布到 Halo

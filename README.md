@@ -33,6 +33,15 @@ Before using this extension, make sure you have the following prerequisites:
 
 1. Open the Command Palette and search for **Halo Setup**.
 2. Fill in the relevant information for your Halo site according to the prompts.
+   1. Site url: The URL of your Halo site, e.g. `https://example.com`
+   2. Personal access token:
+
+       The personal access token of your Halo site, needs `Allows you to manage your own posts` permission.
+
+       ![PAT](./images/pat-en.png)
+
+       More information about personal access token: [Personal Access Token](https://docs.halo.run/user-guide/user-center#%E4%B8%AA%E4%BA%BA%E4%BB%A4%E7%89%8C)
+
 3. Open a Markdown file, then open the command palette and search for **Halo Publish**. Once selected, this document will be published to the Halo site.
 4. All available commands:
     - **vscode-extension-halo.setup**: Setup Halo site information.
