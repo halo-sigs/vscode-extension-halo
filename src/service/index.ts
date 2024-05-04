@@ -224,11 +224,20 @@ class HaloService {
         params = newPost;
       }
 
-      // Publish post
-      if (matterData.halo?.publish) {
-        await this.postApi.publishMyPost({ name: params.metadata.name });
+      if (matterData?.halo?.hasOwnProperty("publish")) {
+        // Publish post
+        if (matterData.halo?.publish) {
+          await this.postApi.publishMyPost({ name: params.metadata.name });
+        } else {
+          await this.postApi.unpublishMyPost({ name: params.metadata.name });
+        }
       } else {
-        await this.postApi.unpublishMyPost({ name: params.metadata.name });
+        const postConfiguration =
+          vscode.workspace.getConfiguration("halo.post");
+
+        if (postConfiguration.get<boolean>("publishByDefault")) {
+          await this.postApi.publishMyPost({ name: params.metadata.name });
+        }
       }
 
       // Fetch new post and content

@@ -65,7 +65,18 @@
         "command": "vscode-extension-halo.set-tags",
         "title": "%vscode-extension-halo.set-tags%"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Halo",
+      "properties": {
+        "halo.post.publishByDefault": {
+          "type": "boolean",
+          "default": false,
+          "description": "%vscode-extension-halo.configuration.post.publishByDefault%"
+        }
+      }
+    }
   },
   "activationEvents": [],
   "lint-staged": {
