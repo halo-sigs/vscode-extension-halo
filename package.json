@@ -24,15 +24,15 @@
   "publisher": "halo-dev",
   "main": "./dist/extension.js",
   "scripts": {
-    "compile": "webpack",
+    "compile": "rspack",
     "compile-tests": "tsc -p . --outDir out",
     "lint": "eslint src --ext ts",
-    "package": "webpack --mode production --devtool hidden-source-map",
+    "package": "rspack --mode production --devtool true",
     "prepare": "husky",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "test": "node ./out/test/runTest.js",
     "vscode:prepublish": "npm run package",
-    "watch": "webpack --watch",
+    "watch": "rspack --watch",
     "watch-tests": "tsc -p . -w --outDir out"
   },
   "contributes": {
@@ -97,6 +97,9 @@
     "transliteration": "^2.3.5"
   },
   "devDependencies": {
+    "@rspack/cli": "^1.1.6",
+    "@rspack/core": "^1.1.6",
+    "@swc/helpers": "^0.5.15",
     "@types/glob": "^8.1.0",
     "@types/js-yaml": "^4.0.8",
     "@types/markdown-it": "^12.2.3",
@@ -112,13 +115,12 @@
     "lint-staged": "^15.2.2",
     "mocha": "^10.2.0",
     "ts-loader": "^9.5.0",
-    "typescript": "^5.2.2",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4"
+    "typescript": "^5.2.2"
   },
   "engines": {
     "vscode": "^1.79.0"
   },
   "icon": "assets/icon.png",
-  "l10n": "./l10n"
+  "l10n": "./l10n",
+  "packageManager": "npm@10.9.1+sha512.c89530d37c4baa38afd43e76a077a84b9aa63840b986426584fd5c5a54ab0a0b21bb1595c851042b733784b0b43706d36a494b4d8ae1a086a762cb8d3f95942a"
 }
