@@ -1,6 +1,6 @@
+import * as vscode from "vscode";
 import HaloService from "../service";
 import SiteStore from "../utils/site-store";
-import * as vscode from "vscode";
 import { mergeMatter, readMatter } from "../utils/yaml";
 
 export default async () => {
@@ -15,16 +15,14 @@ export default async () => {
   const service = new HaloService(siteStore.getDefaultSite());
 
   const { content: raw, data: matterData } = readMatter(
-    activeEditor.document.getText()
+    activeEditor.document.getText(),
   );
 
   const currentTags = matterData.tags || [];
   const allTags = service.getTags();
 
   const selectedTags = await vscode.window.showQuickPick(
-    (
-      await allTags
-    ).map((tag) => {
+    (await allTags).map((tag) => {
       return {
         label: tag.spec.displayName,
         picked: currentTags.includes(tag.spec.displayName),
@@ -36,7 +34,7 @@ export default async () => {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
-    }
+    },
   );
 
   if (!selectedTags) {
@@ -51,9 +49,11 @@ export default async () => {
     editBuilder.replace(
       new vscode.Range(
         activeEditor.document.positionAt(0),
-        activeEditor.document.positionAt(activeEditor.document.getText().length)
+        activeEditor.document.positionAt(
+          activeEditor.document.getText().length,
+        ),
       ),
-      modifiedContent
+      modifiedContent,
     );
   });
 

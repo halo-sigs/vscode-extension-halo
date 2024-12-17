@@ -16,7 +16,7 @@ class SiteStore {
     this.preferences = new Preferences(PREFERENCES_KEY);
   }
 
-  private set(key: string, value: any) {
+  private set(key: string, value: unknown) {
     this.preferences[key] = value;
     this.preferences.save();
   }
@@ -50,7 +50,9 @@ class SiteStore {
       return;
     }
 
-    sites.forEach((site) => (site.default = false));
+    for (const site of sites) {
+      site.default = false;
+    }
 
     // Currently only support one site
     sites[0] = site;

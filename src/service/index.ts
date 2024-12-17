@@ -1,25 +1,25 @@
+import { File } from "node:buffer";
+import { randomUUID } from "node:crypto";
+import * as fs from "node:fs";
 import {
-  Category,
-  CategoryList,
-  Content,
-  ListedPost,
-  Post,
-  Tag,
-  TagList,
+  type Category,
+  type CategoryList,
+  type Content,
+  type ListedPost,
+  type Post,
+  type Tag,
+  type TagList,
   UcApiContentHaloRunV1alpha1AttachmentApi,
   UcApiContentHaloRunV1alpha1PostApi,
 } from "@halo-dev/api-client";
-import axios, { AxiosInstance } from "axios";
-import * as vscode from "vscode";
-import { mergeMatter, readMatter } from "../utils/yaml";
-import { randomUUID } from "crypto";
-import { slugify } from "transliteration";
-import * as fs from "fs";
-import { File } from "buffer";
+import axios, { type AxiosInstance } from "axios";
 import { fileTypeFromFile } from "file-type";
-import { Site } from "../utils/site-store";
+import { slugify } from "transliteration";
+import * as vscode from "vscode";
 import markdownIt from "../utils/markdown";
-import path = require("path");
+import type { Site } from "../utils/site-store";
+import { mergeMatter, readMatter } from "../utils/yaml";
+import path = require("node:path");
 
 class HaloService {
   private readonly site: Site;
@@ -42,17 +42,17 @@ class HaloService {
     this.postApi = new UcApiContentHaloRunV1alpha1PostApi(
       undefined,
       site.url,
-      axiosInstance
+      axiosInstance,
     );
     this.attachmentApi = new UcApiContentHaloRunV1alpha1AttachmentApi(
       undefined,
       site.url,
-      axiosInstance
+      axiosInstance,
     );
   }
 
   public async getPost(
-    name: string
+    name: string,
   ): Promise<{ post: Post; content: Content } | undefined> {
     try {
       const { data: post } = await this.postApi.getMyPost({ name });
@@ -132,7 +132,7 @@ class HaloService {
     };
 
     const { content: raw, data: matterData } = readMatter(
-      activeEditor.document.getText()
+      activeEditor.document.getText(),
     );
 
     // check site url
@@ -224,6 +224,7 @@ class HaloService {
         params = newPost;
       }
 
+      // biome-ignore lint: no
       if (matterData?.halo?.hasOwnProperty("publish")) {
         // Publish post
         if (matterData.halo?.publish) {
@@ -249,7 +250,7 @@ class HaloService {
       }
     } catch (error) {
       vscode.window.showErrorMessage(
-        vscode.l10n.t("Publish failed, please try again")
+        vscode.l10n.t("Publish failed, please try again"),
       );
       return;
     }
@@ -268,10 +269,10 @@ class HaloService {
         new vscode.Range(
           activeEditor.document.positionAt(0),
           activeEditor.document.positionAt(
-            activeEditor.document.getText().length
-          )
+            activeEditor.document.getText().length,
+          ),
         ),
-        modifiedContent
+        modifiedContent,
       );
     });
 
@@ -288,7 +289,7 @@ class HaloService {
       .then((selectedItem) => {
         if (selectedItem === item) {
           vscode.env.openExternal(
-            vscode.Uri.parse(`${this.site.url}${params.status?.permalink}`)
+            vscode.Uri.parse(`${this.site.url}${params.status?.permalink}`),
           );
         }
       });
@@ -306,7 +307,7 @@ class HaloService {
 
     if (!matterData.halo?.name) {
       vscode.window.showErrorMessage(
-        vscode.l10n.t("Please publish the post first")
+        vscode.l10n.t("Please publish the post first"),
       );
       return;
     }
@@ -319,11 +320,11 @@ class HaloService {
     }
 
     const postCategories = await this.getCategoryDisplayNames(
-      post.post.spec.categories
+      post.post.spec.categories,
     );
     const postTags = await this.getTagDisplayNames(post.post.spec.tags);
 
-    const modifiedContent = mergeMatter(post.content.raw + "", {
+    const modifiedContent = mergeMatter(`${post.content.raw}`, {
       title: post.post.spec.title,
       slug: post.post.spec.slug,
       excerpt: post.post.spec.excerpt.autoGenerate
@@ -344,10 +345,10 @@ class HaloService {
         new vscode.Range(
           activeEditor.document.positionAt(0),
           activeEditor.document.positionAt(
-            activeEditor.document.getText().length
-          )
+            activeEditor.document.getText().length,
+          ),
         ),
-        modifiedContent
+        modifiedContent,
       );
     });
 
@@ -360,7 +361,7 @@ class HaloService {
       const document = activeEditor.document;
       if (document.languageId !== "markdown") {
         vscode.window.showWarningMessage(
-          vscode.l10n.t("Please open a Markdown file.")
+          vscode.l10n.t("Please open a Markdown file."),
         );
         return;
       }
@@ -377,11 +378,12 @@ class HaloService {
       const markdownText = document.getText();
       const imageRegex = /!\[.*?\]\((.*?)\)/g;
 
-      let match;
+      let match: RegExpExecArray | null;
 
       const imagePaths: { path: string; absolutePath: string }[] = [];
       const matchedImages: { old: string; new: string }[] = [];
 
+      // biome-ignore lint: no
       while ((match = imageRegex.exec(markdownText)) !== null) {
         const imagePath = match[1];
 
@@ -391,7 +393,7 @@ class HaloService {
 
         const absoluteImagePath = path.resolve(
           path.dirname(document.uri.fsPath),
-          imagePath
+          imagePath,
         );
 
         imagePaths.push({
@@ -420,7 +422,7 @@ class HaloService {
 
             const permalink = await this.uploadImage(
               imagePath.absolutePath,
-              matterData.halo.name
+              matterData.halo.name,
             );
 
             matchedImages.push({
@@ -430,17 +432,18 @@ class HaloService {
           }
 
           let newMarkdownText = markdownText;
-          matchedImages.forEach((item) => {
+
+          for (const item of matchedImages) {
             newMarkdownText = newMarkdownText.replace(item.old, item.new);
-          });
+          }
 
           await activeEditor.edit((editBuilder) => {
             editBuilder.replace(
               new vscode.Range(
                 document.positionAt(0),
-                document.positionAt(markdownText.length)
+                document.positionAt(markdownText.length),
               ),
-              newMarkdownText
+              newMarkdownText,
             );
           });
 
@@ -448,10 +451,10 @@ class HaloService {
 
           if (matchedImages.length > 0) {
             vscode.window.showInformationMessage(
-              vscode.l10n.t("Upload images success!")
+              vscode.l10n.t("Upload images success!"),
             );
           }
-        }
+        },
       );
     }
   }
@@ -465,14 +468,14 @@ class HaloService {
 
   public async getCategories(): Promise<Category[]> {
     const { data: categories } = await this.apiClient.get<CategoryList>(
-      "/apis/content.halo.run/v1alpha1/categories"
+      "/apis/content.halo.run/v1alpha1/categories",
     );
     return Promise.resolve(categories.items);
   }
 
   public async getTags(): Promise<Tag[]> {
     const { data: tags } = await this.apiClient.get<TagList>(
-      "/apis/content.halo.run/v1alpha1/tags"
+      "/apis/content.halo.run/v1alpha1/tags",
     );
     return Promise.resolve(tags.items);
   }
@@ -491,7 +494,7 @@ class HaloService {
       return;
     }
 
-    const fileName = post.post.spec.title + ".md";
+    const fileName = `${post.post.spec.title}.md`;
     const fileUri = vscode.Uri.joinPath(folderUri, fileName);
 
     try {
@@ -503,11 +506,11 @@ class HaloService {
     } catch {}
 
     const postCategories = await this.getCategoryDisplayNames(
-      post.post.spec.categories
+      post.post.spec.categories,
     );
     const postTags = await this.getTagDisplayNames(post.post.spec.tags);
 
-    const modifiedContent = mergeMatter(post.content.raw + "", {
+    const modifiedContent = mergeMatter(`${post.content.raw}`, {
       title: post.post.spec.title,
       slug: post.post.spec.slug,
       excerpt: post.post.spec.excerpt.autoGenerate
@@ -539,7 +542,7 @@ class HaloService {
       path.basename(file),
       {
         type: fileType?.mime,
-      }
+      },
     );
 
     try {
@@ -565,7 +568,7 @@ class HaloService {
     const allCategories = await this.getCategories();
 
     const notExistDisplayNames = displayNames.filter(
-      (name) => !allCategories.find((item) => item.spec.displayName === name)
+      (name) => !allCategories.find((item) => item.spec.displayName === name),
     );
 
     const promises = notExistDisplayNames.map((name, index) =>
@@ -584,8 +587,8 @@ class HaloService {
           apiVersion: "content.halo.run/v1alpha1",
           kind: "Category",
           metadata: { name: "", generateName: "category-" },
-        }
-      )
+        },
+      ),
     );
 
     const newCategories = await Promise.all(promises);
@@ -593,7 +596,7 @@ class HaloService {
     const existNames = displayNames
       .map((name) => {
         const found = allCategories.find(
-          (item) => item.spec.displayName === name
+          (item) => item.spec.displayName === name,
         );
         return found ? found.metadata.name : undefined;
       })
@@ -619,7 +622,7 @@ class HaloService {
     const allTags = await this.getTags();
 
     const notExistDisplayNames = displayNames.filter(
-      (name) => !allTags.find((item) => item.spec.displayName === name)
+      (name) => !allTags.find((item) => item.spec.displayName === name),
     );
 
     const promises = notExistDisplayNames.map((name) =>
@@ -633,7 +636,7 @@ class HaloService {
         apiVersion: "content.halo.run/v1alpha1",
         kind: "Tag",
         metadata: { name: "", generateName: "tag-" },
-      })
+      }),
     );
 
     const newTags = await Promise.all(promises);

@@ -16,7 +16,7 @@ async function fetchPosts(): Promise<HaloPostQuickPickItem[]> {
     return {
       label: item.post.spec.title,
       description: vscode.l10n.t(
-        item.post.spec.publish ? "Published" : "Draft"
+        item.post.spec.publish ? "Published" : "Draft",
       ),
       name: item.post.metadata.name,
     };
@@ -32,7 +32,7 @@ export default async () => {
       placeHolder: vscode.l10n.t("Please select a post"),
       matchOnDescription: true,
       canPickMany: true,
-    }
+    },
   );
 
   if (!items?.length) {
@@ -54,6 +54,6 @@ export default async () => {
 
         await service.pullPost(item.name);
       }
-    }
+    },
   );
 };

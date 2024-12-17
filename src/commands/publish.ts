@@ -18,7 +18,7 @@ export default async () => {
       },
       async () => {
         await service.publishPost();
-      }
+      },
     );
   }
 };

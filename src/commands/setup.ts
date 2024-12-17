@@ -1,7 +1,7 @@
+import { UcApiContentHaloRunV1alpha1PostApi } from "@halo-dev/api-client";
+import axios from "axios";
 import * as vscode from "vscode";
 import SiteStore from "../utils/site-store";
-import axios from "axios";
-import { UcApiContentHaloRunV1alpha1PostApi } from "@halo-dev/api-client";
 
 export default async () => {
   const siteStore = new SiteStore();
@@ -45,7 +45,7 @@ export default async () => {
         headers: {
           Authorization: `Bearer ${pat}`,
         },
-      })
+      }),
     );
 
     // Check if the pat is valid
@@ -61,8 +61,8 @@ export default async () => {
   } catch (e) {
     vscode.window.showErrorMessage(
       vscode.l10n.t(
-        "Setup Failed, Please check your site url and personal access token"
-      )
+        "Setup Failed, Please check your site url and personal access token",
+      ),
     );
   }
 };
