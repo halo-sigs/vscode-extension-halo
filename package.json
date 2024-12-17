@@ -27,7 +27,7 @@
     "check": "biome check --write src/",
     "package": "rspack --mode production --devtool true",
     "prepare": "husky",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "pretest": "npm run compile-tests && npm run compile && npm run check",
     "test": "node ./out/test/runTest.js",
     "vscode:prepublish": "npm run package",
     "watch": "rspack --watch",
@@ -78,7 +78,7 @@
   },
   "activationEvents": [],
   "lint-staged": {
-    "*.{ts}": ["eslint --fix"]
+    "*.{ts}": ["biome check --changed"]
   },
   "dependencies": {
     "@halo-dev/api-client": "^2.15.0",
@@ -103,10 +103,7 @@
     "@types/mocha": "^10.0.3",
     "@types/node": "20.2.5",
     "@types/vscode": "^1.79.0",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
     "@vscode/test-electron": "^2.3.6",
-    "eslint": "^8.52.0",
     "glob": "^8.1.0",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
