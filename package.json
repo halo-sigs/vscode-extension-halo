@@ -81,7 +81,7 @@
     "*.{ts}": ["biome check --changed"]
   },
   "dependencies": {
-    "@halo-dev/api-client": "^2.15.0",
+    "@halo-dev/api-client": "^2.20.0",
     "axios": "^1.6.8",
     "file-type": "^19.0.0",
     "form-data": "^4.0.0",
