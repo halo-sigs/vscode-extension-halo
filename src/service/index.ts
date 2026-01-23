@@ -543,10 +543,8 @@ class HaloService {
 
     try {
       const { data: attachment } =
-        await this.attachmentApi.createAttachmentForPost({
+        await this.attachmentApi.uploadAttachmentForUc({
           file: fileBlob,
-          postName,
-          waitForPermalink: true,
         });
 
       if (attachment.status?.permalink?.startsWith("http")) {
