@@ -2,15 +2,15 @@ import { File } from "node:buffer";
 import { randomUUID } from "node:crypto";
 import * as fs from "node:fs";
 import {
+  AttachmentV1alpha1UcApi,
   type Category,
   type CategoryList,
   type Content,
   type ListedPost,
   type Post,
+  PostV1alpha1UcApi,
   type Tag,
   type TagList,
-  UcApiContentHaloRunV1alpha1AttachmentApi,
-  UcApiContentHaloRunV1alpha1PostApi,
 } from "@halo-dev/api-client";
 import axios, { type AxiosInstance } from "axios";
 import { fileTypeFromFile } from "file-type";
@@ -24,8 +24,8 @@ import path = require("node:path");
 class HaloService {
   private readonly site: Site;
   private readonly apiClient: AxiosInstance;
-  private readonly postApi: UcApiContentHaloRunV1alpha1PostApi;
-  private readonly attachmentApi: UcApiContentHaloRunV1alpha1AttachmentApi;
+  private readonly postApi: PostV1alpha1UcApi;
+  private readonly attachmentApi: AttachmentV1alpha1UcApi;
 
   constructor(site?: Site) {
     if (!site) {
@@ -39,12 +39,8 @@ class HaloService {
       },
     });
     this.apiClient = axiosInstance;
-    this.postApi = new UcApiContentHaloRunV1alpha1PostApi(
-      undefined,
-      site.url,
-      axiosInstance,
-    );
-    this.attachmentApi = new UcApiContentHaloRunV1alpha1AttachmentApi(
+    this.postApi = new PostV1alpha1UcApi(undefined, site.url, axiosInstance);
+    this.attachmentApi = new AttachmentV1alpha1UcApi(
       undefined,
       site.url,
       axiosInstance,
@@ -461,7 +457,7 @@ class HaloService {
 
   public async getPosts(): Promise<ListedPost[]> {
     const { data: posts } = await this.postApi.listMyPosts({
-      labelSelector: [ "content.halo.run/deleted=false" ],
+      labelSelector: ["content.halo.run/deleted=false"],
     });
     return Promise.resolve(posts.items);
   }
@@ -538,7 +534,7 @@ class HaloService {
     const fileType = await fileTypeFromFile(file);
 
     const fileBlob = new File(
-      [ fs.readFileSync(decodeURIComponent(file)) ],
+      [fs.readFileSync(decodeURIComponent(file))],
       path.basename(file),
       {
         type: fileType?.mime,
@@ -547,10 +543,8 @@ class HaloService {
 
     try {
       const { data: attachment } =
-        await this.attachmentApi.createAttachmentForPost({
+        await this.attachmentApi.uploadAttachmentForUc({
           file: fileBlob,
-          postName,
-          waitForPermalink: true,
         });
 
       if (attachment.status?.permalink?.startsWith("http")) {
@@ -648,7 +642,7 @@ class HaloService {
       })
       .filter(Boolean) as string[];
 
-    return [ ...existNames, ...newTags.map((item) => item.data.metadata.name) ];
+    return [...existNames, ...newTags.map((item) => item.data.metadata.name)];
   }
 
   public async getTagDisplayNames(names?: string[]): Promise<string[]> {

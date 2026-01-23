@@ -1,4 +1,4 @@
-import { UcApiContentHaloRunV1alpha1PostApi } from "@halo-dev/api-client";
+import { PostV1alpha1UcApi } from "@halo-dev/api-client";
 import axios from "axios";
 import * as vscode from "vscode";
 import SiteStore from "../utils/site-store";
@@ -37,7 +37,7 @@ export default async () => {
   }
 
   try {
-    const postApi = new UcApiContentHaloRunV1alpha1PostApi(
+    const postApi = new PostV1alpha1UcApi(
       undefined,
       url,
       axios.create({
