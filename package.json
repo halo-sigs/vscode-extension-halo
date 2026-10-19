@@ -39,33 +39,127 @@
     "commands": [
       {
         "command": "vscode-extension-halo.setup",
-        "title": "%vscode-extension-halo.setup%"
+        "title": "%vscode-extension-halo.setup%",
+        "category": "Halo"
       },
       {
         "command": "vscode-extension-halo.publish",
-        "title": "%vscode-extension-halo.publish%"
+        "title": "%vscode-extension-halo.publish%",
+        "category": "Halo"
       },
       {
         "command": "vscode-extension-halo.pull",
-        "title": "%vscode-extension-halo.pull%"
+        "title": "%vscode-extension-halo.pull%",
+        "category": "Halo"
+      },
+      {
+        "command": "vscode-extension-halo.publish-batch",
+        "title": "%vscode-extension-halo.publish-batch%",
+        "category": "Halo"
+      },
+      {
+        "command": "vscode-extension-halo.publish-batch",
+        "title": "%vscode-extension-halo.publish-batch%",
+        "category": "Halo",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "vscode-extension-halo.config-image-upload",
+        "title": "%vscode-extension-halo.config-image-upload%",
+        "category": "Halo"
       },
       {
         "command": "vscode-extension-halo.upload-images",
-        "title": "%vscode-extension-halo.upload-images%"
+        "title": "%vscode-extension-halo.upload-images%",
+        "category": "Halo"
       },
       {
         "command": "vscode-extension-halo.update",
-        "title": "%vscode-extension-halo.update%"
+        "title": "%vscode-extension-halo.update%",
+        "category": "Halo"
       },
       {
         "command": "vscode-extension-halo.set-categories",
-        "title": "%vscode-extension-halo.set-categories%"
+        "title": "%vscode-extension-halo.set-categories%",
+        "category": "Halo"
       },
       {
         "command": "vscode-extension-halo.set-tags",
-        "title": "%vscode-extension-halo.set-tags%"
+        "title": "%vscode-extension-halo.set-tags%",
+        "category": "Halo"
+      },
+      {
+        "command": "vscode-extension-halo.explorer.publish-batch",
+        "title": "%menu.publish-batch%"
+      },
+      {
+        "command": "vscode-extension-halo.explorer.publish",
+        "title": "%menu.publish%"
+      },
+      {
+        "command": "vscode-extension-halo.explorer.update",
+        "title": "%menu.update%"
+      },
+      {
+        "command": "vscode-extension-halo.explorer.upload-images",
+        "title": "%menu.upload-images%"
+      },
+      {
+        "command": "vscode-extension-halo.explorer.pull",
+        "title": "%menu.pull%"
       }
     ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "vscode-extension-halo.explorer.publish-batch",
+          "when": "explorerResourceIsFolder || explorerResourceIsRoot || resourceExtname == .md",
+          "group": "2_workspace"
+        },
+        {
+          "command": "vscode-extension-halo.explorer.publish",
+          "when": "resourceExtname == .md",
+          "group": "2_workspace"
+        },
+        {
+          "command": "vscode-extension-halo.explorer.update",
+          "when": "resourceExtname == .md",
+          "group": "2_workspace"
+        },
+        {
+          "command": "vscode-extension-halo.explorer.upload-images",
+          "when": "resourceExtname == .md",
+          "group": "2_workspace"
+        },
+        {
+          "command": "vscode-extension-halo.explorer.pull",
+          "when": "explorerResourceIsFolder || explorerResourceIsRoot",
+          "group": "2_workspace"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "vscode-extension-halo.explorer.publish-batch",
+          "when": "false"
+        },
+        {
+          "command": "vscode-extension-halo.explorer.publish",
+          "when": "false"
+        },
+        {
+          "command": "vscode-extension-halo.explorer.update",
+          "when": "false"
+        },
+        {
+          "command": "vscode-extension-halo.explorer.upload-images",
+          "when": "false"
+        },
+        {
+          "command": "vscode-extension-halo.explorer.pull",
+          "when": "false"
+        }
+      ]
+    },
     "configuration": {
       "type": "object",
       "title": "Halo",
@@ -74,6 +168,34 @@
           "type": "boolean",
           "default": false,
           "description": "%vscode-extension-halo.configuration.post.publishByDefault%"
+        },
+        "halo.network.requestTimeout": {
+          "type": "number",
+          "default": 60,
+          "description": "%vscode-extension-halo.configuration.network.requestTimeout%"
+        },
+        "halo.network.uploadTimeout": {
+          "type": "number",
+          "default": 120,
+          "description": "%vscode-extension-halo.configuration.network.uploadTimeout%"
+        },
+        "halo.post.slugStrategy": {
+          "type": "string",
+          "enum": [
+            "timestamp",
+            "pinyin"
+          ],
+          "default": "timestamp",
+          "description": "%vscode-extension-halo.configuration.post.slugStrategy%",
+          "enumDescriptions": [
+            "%vscode-extension-halo.configuration.post.slugStrategy.timestamp%",
+            "%vscode-extension-halo.configuration.post.slugStrategy.pinyin%"
+          ]
+        },
+        "halo.image.transfer.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "%vscode-extension-halo.configuration.image.transfer.enabled%"
         }
       }
     }
